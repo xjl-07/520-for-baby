@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>给宝贝的520 | 我们的故事 ❤️</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-serif;background:#1a0510;color:#fff;overflow-x:hidden;cursor:default}
+
+/* Three.js 3D 画布 */
+#threeCanvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
+
+/* 2D 叠加层：鼠标爱心 + 开场 */
+#overlayCanvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9997;pointer-events:none}
+
+/* 弹幕层 */
+#danmaku-container{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9996;pointer-events:none;overflow:hidden}
+.danmaku-item{
+  position:absolute;
+  white-space:nowrap;
+  font-size:15px;
+  font-weight:300;
+  letter-spacing:1px;
+  padding:6px 14px;
+  border-radius:20px;
+  background:rgba(255,100,170,0.12);
+  border:1px solid rgba(255,130,190,0.25);
+  backdrop-filter:blur(4px);
+  color:rgba(255,220,235,0.9);
+  text-shadow:0 0 8px rgba(255,100,170,0.5);
+  animation:danmaku-move linear forwards;
+  pointer-events:none;
+}
+@keyframes danmaku-move{
+  from{transform:translateX(0)}
+  to{transform:translateX(calc(-100vw - 100%))}
+}
+
+/* 开场 */
+#opening{position:fixed;top:0;left:0;width:100vw;height:100vh;background:radial-gradient(ellipse at 50% 60%,#3d0a28 0%,#1a0510 70%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.4s ease,transform 1.4s ease}
+#opening.hidden{opacity:0;transform:scale(1.08);pointer-events:none}
+#heartCanvas{width:100vw;height:60vh}
+#opening-title{font-size:clamp(24px,5vw,48px);font-weight:300;letter-spacing:8px;color:rgba(255,180,220,0.92);margin-top:20px;opacity:0;animation:fadeInUp 1.5s ease 2.5s forwards}
+#opening-hint{font-size:14px;color:rgba(255,180,220,0.5);margin-top:30px;opacity:0;animation:fadeInUp 1s ease 3.5s forwards,pulse 2s ease 4.5s infinite}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:0.45}50%{opacity:1}}
+
+/* 主内容 */
+.main-content{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:60px 20px;opacity:0;transform:translateY(30px)}
+.main-content.visible{opacity:1;transform:translateY(0);transition:opacity 1s ease,transform 1s ease}
+.section-title{text-align:center;margin:80px 0 50px}
+.section-title h2{font-size:clamp(28px,5vw,42px);font-weight:300;background:linear-gradient(135deg,#ff6eb4,#ffb4dc,#ff9ed5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px}
+.section-title .line{width:60px;height:2px;background:linear-gradient(90deg,transparent,#ff6eb4,transparent);margin:15px auto 0}
+
+/* 时间线 */
+.timeline{position:relative;padding:20px 0}
+.timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,transparent,#ff6eb4 20%,#ff6eb4 80%,transparent);transform:translateX(-50%)}
+.timeline-item{position:relative;width:50%;padding:20px 40px;opacity:0;transform:translateY(40px);transition:all 0.8s cubic-bezier(0.16,1,0.3,1)}
+.timeline-item.visible{opacity:1;transform:translateY(0)}
+.timeline-item:nth-child(odd){left:0;text-align:right;padding-right:60px}
+.timeline-item:nth-child(even){left:50%;text-align:left;padding-left:60px}
+.timeline-dot{position:absolute;top:30px;width:16px;height:16px;background:#ff6eb4;border-radius:50%;box-shadow:0 0 20px rgba(255,110,180,0.7);z-index:2}
+.timeline-item:nth-child(odd) .timeline-dot{right:-8px}
+.timeline-item:nth-child(even) .timeline-dot{left:-8px}
+.timeline-date{font-size:13px;color:rgba(255,180,220,0.7);letter-spacing:2px;margin-bottom:8px}
+.timeline-card{background:rgba(255,180,220,0.06);border:1px solid rgba(255,110,180,0.22);border-radius:16px;padding:20px;backdrop-filter:blur(12px);transition:transform 0.3s ease,box-shadow 0.3s ease}
+.timeline-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(255,110,180,0.2)}
+.timeline-card .photo{width:100%;height:250px;border-radius:12px;margin-bottom:12px;overflow:hidden;background:rgba(255,110,180,0.08);display:flex;align-items:center;justify-content:center}
+.timeline-card .photo img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.timeline-card .words{font-size:15px;line-height:1.85;color:rgba(255,220,235,0.92);font-weight:300;min-height:60px}
+
+/* 相册 */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;padding:20px 0}
+.gallery-item{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1;background:rgba(255,110,180,0.08);cursor:pointer;opacity:0;transform:translateY(30px) scale(0.95);transition:all 0.6s cubic-bezier(0.16,1,0.3,1)}
+.gallery-item.visible{opacity:1;transform:translateY(0) scale(1)}
+.gallery-item:hover{transform:scale(1.03)!important;box-shadow:0 10px 40px rgba(255,110,180,0.35);z-index:10}
+.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease}
+.gallery-item:hover img{transform:scale(1.08)}
+.gallery-item .overlay{position:absolute;bottom:0;left:0;right:0;padding:40px 15px 15px;background:linear-gradient(transparent,rgba(80,0,40,0.75));opacity:0;transition:opacity 0.3s ease}
+.gallery-item:hover .overlay{opacity:1}
+.gallery-item .caption{font-size:13px;color:rgba(255,220,235,0.9)}
+
+/* 结尾 */
+.ending{text-align:center;padding:100px 20px;opacity:0;transform:translateY(30px);transition:all 1s ease}
+.ending.visible{opacity:1;transform:translateY(0)}
+.ending .heart-icon{font-size:48px;margin-bottom:20px;display:inline-block;animation:heartbeat 1.5s ease infinite}
+@keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.1)}}
+.ending h3{font-size:clamp(22px,4vw,32px);font-weight:300;color:rgba(255,180,220,0.9);margin-bottom:10px}
+.ending .from{font-size:16px;color:rgba(255,180,220,0.6);letter-spacing:3px}
+.ending .date{font-size:14px;color:rgba(255,180,220,0.4);margin-top:8px}
+
+/* 音乐按钮 */
+#music-btn{position:fixed;bottom:30px;right:30px;z-index:200;width:50px;height:50px;border-radius:50%;border:1px solid rgba(255,110,180,0.4);background:rgba(60,10,40,0.85);backdrop-filter:blur(10px);color:#ff6eb4;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease}
+#music-btn:hover{background:rgba(255,110,180,0.2);transform:scale(1.1)}
+#music-btn.playing{animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,110,180,0.3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,110,180,0.5)}
+
+@media(max-width:768px){
+  .timeline::before{left:20px}
+  .timeline-item,.timeline-item:nth-child(odd),.timeline-item:nth-child(even){width:100%;left:0;text-align:left;padding-left:50px;padding-right:20px}
+  .timeline-item:nth-child(odd) .timeline-dot,.timeline-item:nth-child(even) .timeline-dot{left:12px;right:auto}
+  .gallery{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- Three.js 3D 场景 -->
+<canvas id="threeCanvas"></canvas>
+<!-- 2D 鼠标爱心叠层 -->
+<canvas id="overlayCanvas"></canvas>
+<!-- 弹幕层 -->
+<div id="danmaku-container"></div>
+
+<!-- 开场 -->
+<div id="opening">
+  <canvas id="heartCanvas"></canvas>
+  <div id="opening-title">给宝贝 ❤️</div>
+  <div id="opening-hint">▼ 点击任意处进入我们的故事 ▼</div>
+</div>
+
+<!-- 主内容 -->
+<div class="main-content" id="mainContent">
+  <div class="section-title"><h2>我们的时光</h2><div class="line"></div></div>
+  <div class="timeline" id="timeline"></div>
+
+  <div class="section-title"><h2>相册 · 瞬间</h2><div class="line"></div></div>
+  <div class="gallery" id="gallery"></div>
+
+  <div class="ending" id="ending">
+    <div class="heart-icon">❤️</div>
+    <h3>520快乐，我的宝贝</h3>
+    <div class="from">—— 来自一直爱你的我</div>
+    <div class="date">2026.05.20</div>
+  </div>
+</div>
+
+<button id="music-btn" title="播放/暂停音乐">🎵</button>
+<audio id="bgm" loop preload="auto">
+  <source src="这就是爱.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Three.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+// ============================================================
+// 配置区
+// ============================================================
+var TIMELINE_DATA = [
+  { date:'2023.02.12', photo:'images/20230212.jpg', words:'第一次遇见你的时候，我就知道，我的故事里一定会有你。' },
+  { date:'2025.01.01', photo:'images/20250101.jpg', words:'最喜欢你笑起来的样子，眼睛弯成月牙，整个世界都亮了。' },
+  { date:'2025.02.03', photo:'images/20250203.jpg', words:'无论未来多远，我想牵着你的手，一直走下去。' },
+  { date:'2026.01.28', photo:'images/20260128.jpg', words:'往后余生，风雪是你，平淡是你。' },
+  { date:'2026.04.26', photo:'images/20260426.jpg', words:'原来喜欢一个人，是看到好看的风景，第一个想分享给她。' }
+];
+var GALLERY_DATA = [
+  { src:'images/20230214.jpg', caption:'第一个情人节' },
+  { src:'images/20230421.jpg', caption:'第一次涂石膏娃娃' },
+  { src:'images/20230827.jpg', caption:'在一起后你的第一个生日' },
+  { src:'images/2024x1.jpg', caption:'第一次看演唱会' },
+  { src:'images/2024x2.png', caption:'第一次看海' },
+  { src:'images/20260328.png', caption:'第一次拍婚纱照' }
+];
+var DANMAKU_LIST = [
+  '❤️ 宝贝，520快乐！',
+  '🌸 遇见你，是我最美的意外',
+  '💕 你是我整个宇宙',
+  '✨ 爱你每一天，每一刻',
+  '🌹 和你在一起的日子最幸福',
+  '💖 你的笑是我最爱的风景',
+  '🎀 感谢你一直陪着我',
+  '🦋 想和你去看世界每个角落',
+  '💝 你是我最想保护的人',
+  '🌷 有你的地方就是家',
+  '💗 每天都想对你说我爱你',
+  '🎵 你是我生命里最美的歌',
+  '🌙 想和你一起看每一个日落',
+  '💞 因为有你，所有的平凡都变得闪光',
+  '🍀 遇见你是我这辈子最幸运的事',
+  '⭐ 你是我星空里最亮的那颗星',
+  '🌺 520，爱你不止今天',
+  '💌 把我所有的温柔都给你'
+];
+
+// ============================================================
+// Three.js 3D 场景：旋转粒子星云 + 3D烟花
+// ============================================================
+(function(){
+  if(typeof THREE === 'undefined') return;
+  var canvas = document.getElementById('threeCanvas');
+  var renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0);
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 2000);
+  camera.position.set(0, 0, 80);
+
+  window.addEventListener('resize', function(){
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ---- 3D 星空粒子 ----
+  var starCount = 1500;
+  var starGeo = new THREE.BufferGeometry();
+  var starPos = new Float32Array(starCount*3);
+  var starColors = new Float32Array(starCount*3);
+  for(var i=0;i<starCount;i++){
+    starPos[i*3]   = (Math.random()-0.5)*600;
+    starPos[i*3+1] = (Math.random()-0.5)*600;
+    starPos[i*3+2] = (Math.random()-0.5)*400;
+    // 偏粉偏白
+    var pink = Math.random()<0.4;
+    starColors[i*3]   = pink ? 1.0 : 0.95;
+    starColors[i*3+1] = pink ? 0.55+Math.random()*0.2 : 0.88+Math.random()*0.1;
+    starColors[i*3+2] = pink ? 0.75+Math.random()*0.2 : 0.95+Math.random()*0.05;
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
+  starGeo.setAttribute('color', new THREE.BufferAttribute(starColors,3));
+  var starMat = new THREE.PointsMaterial({size:0.7, vertexColors:true, transparent:true, opacity:0.85, sizeAttenuation:true});
+  var starField = new THREE.Points(starGeo, starMat);
+  scene.add(starField);
+
+  // ---- 3D 漂浮爱心粒子云 ----
+  var heartCount = 400;
+  var heartGeo = new THREE.BufferGeometry();
+  var hPos = new Float32Array(heartCount*3);
+  var hCol = new Float32Array(heartCount*3);
+  var hVel = [];
+  for(var j=0;j<heartCount;j++){
+    hPos[j*3]   = (Math.random()-0.5)*120;
+    hPos[j*3+1] = (Math.random()-0.5)*80;
+    hPos[j*3+2] = (Math.random()-0.5)*60;
+    hCol[j*3]   = 1.0;
+    hCol[j*3+1] = 0.4+Math.random()*0.3;
+    hCol[j*3+2] = 0.6+Math.random()*0.3;
+    hVel.push({ x:(Math.random()-0.5)*0.02, y:Math.random()*0.015+0.005, z:(Math.random()-0.5)*0.01, phase:Math.random()*Math.PI*2 });
+  }
+  heartGeo.setAttribute('position', new THREE.BufferAttribute(hPos,3));
+  heartGeo.setAttribute('color', new THREE.BufferAttribute(hCol,3));
+  var heartMat = new THREE.PointsMaterial({size:2.2, vertexColors:true, transparent:true, opacity:0.7, sizeAttenuation:true});
+  var heartCloud = new THREE.Points(heartGeo, heartMat);
+  scene.add(heartCloud);
+
+  // ---- 3D 烟花系统 ----
+  var fireworkSystems = [];
+  var PINK_COLORS = [
+    new THREE.Color(1.0, 0.41, 0.71),
+    new THREE.Color(1.0, 0.71, 0.76),
+    new THREE.Color(1.0, 0.08, 0.58),
+    new THREE.Color(1.0, 0.63, 0.87),
+    new THREE.Color(1.0, 0.90, 0.95),
+    new THREE.Color(1.0, 0.55, 0.78)
+  ];
+
+  function createFirework(x, y, z){
+    var count = 120;
+    var geo = new THREE.BufferGeometry();
+    var pos = new Float32Array(count*3);
+    var col = new Float32Array(count*3);
+    var vel = [];
+    var baseColor = PINK_COLORS[Math.floor(Math.random()*PINK_COLORS.length)];
+    for(var k=0;k<count;k++){
+      pos[k*3]=x; pos[k*3+1]=y; pos[k*3+2]=z;
+      var theta = Math.random()*Math.PI*2;
+      var phi   = Math.acos(2*Math.random()-1);
+      var spd   = Math.random()*0.6+0.2;
+      vel.push({ vx:Math.sin(phi)*Math.cos(theta)*spd, vy:Math.sin(phi)*Math.sin(theta)*spd, vz:Math.cos(phi)*spd, gravity:-0.008 });
+      var bright = 0.7+Math.random()*0.3;
+      col[k*3]  =baseColor.r*bright; col[k*3+1]=baseColor.g*bright; col[k*3+2]=baseColor.b*bright;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    geo.setAttribute('color',    new THREE.BufferAttribute(col,3));
+    var mat = new THREE.PointsMaterial({size:1.6, vertexColors:true, transparent:true, opacity:1.0, sizeAttenuation:true});
+    var pts = new THREE.Points(geo, mat);
+    scene.add(pts);
+    fireworkSystems.push({ pts:pts, geo:geo, vel:vel, age:0, maxAge:90 });
+  }
+
+  function updateFireworks(){
+    fireworkSystems = fireworkSystems.filter(function(fw){
+      fw.age++;
+      var t = fw.age/fw.maxAge;
+      fw.pts.material.opacity = Math.max(0, 1-t*t);
+      var pos = fw.geo.attributes.position.array;
+      for(var i=0;i<fw.vel.length;i++){
+        pos[i*3]   += fw.vel[i].vx * (1-t*0.6);
+        pos[i*3+1] += fw.vel[i].vy * (1-t*0.6) + fw.vel[i].gravity * fw.age;
+        pos[i*3+2] += fw.vel[i].vz * (1-t*0.6);
+      }
+      fw.geo.attributes.position.needsUpdate = true;
+      if(fw.age >= fw.maxAge){ scene.remove(fw.pts); fw.geo.dispose(); fw.pts.material.dispose(); return false; }
+      return true;
+    });
+  }
+
+  function launchFirework(){
+    var x = (Math.random()-0.5)*80;
+    var y = 20+Math.random()*30;
+    var z = (Math.random()-0.5)*30;
+    createFirework(x, y, z);
+  }
+
+  // 开场礼炮
+  setTimeout(function(){ for(var i=0;i<5;i++){ (function(d){ setTimeout(launchFirework, d); })(i*300); } }, 1800);
+  // 周期烟花
+  setInterval(function(){ var n=1+Math.floor(Math.random()*2); for(var i=0;i<n;i++){ (function(d){ setTimeout(launchFirework, d); })(i*350); } }, 4000);
+
+  // ---- 点击触发3D烟花 ----
+  document.addEventListener('click', function(e){
+    if(e.target.id==='music-btn') return;
+    var nx = (e.clientX/window.innerWidth)*2-1;
+    var ny = -(e.clientY/window.innerHeight)*2+1;
+    var x = nx*60, y = ny*35, z = 0;
+    for(var i=0;i<3;i++){ (function(d,ox,oy){ setTimeout(function(){ createFirework(x+ox,y+oy,0); },d); })(i*200, (Math.random()-0.5)*10, (Math.random()-0.5)*8); }
+  });
+
+  // ---- 渲染循环 ----
+  var clock = new THREE.Clock();
+  function animate(){
+    requestAnimationFrame(animate);
+    var t = clock.getElapsedTime();
+
+    // 星空缓慢旋转
+    starField.rotation.y = t * 0.008;
+    starField.rotation.x = Math.sin(t*0.003)*0.05;
+
+    // 爱心粒子漂浮
+    var hposArr = heartGeo.attributes.position.array;
+    for(var j2=0;j2<heartCount;j2++){
+      hposArr[j2*3]   += hVel[j2].x + Math.sin(t*0.4+hVel[j2].phase)*0.003;
+      hposArr[j2*3+1] += hVel[j2].y;
+      hposArr[j2*3+2] += hVel[j2].z;
+      // 超出边界循环
+      if(hposArr[j2*3+1] >  45) hposArr[j2*3+1] = -45;
+      if(hposArr[j2*3]   >  65) hposArr[j2*3]   = -65;
+      if(hposArr[j2*3]   < -65) hposArr[j2*3]   =  65;
+    }
+    heartGeo.attributes.position.needsUpdate = true;
+    heartMat.opacity = 0.5 + 0.2*Math.sin(t*0.8);
+
+    // 相机轻微呼吸
+    camera.position.x = Math.sin(t*0.15)*3;
+    camera.position.y = Math.sin(t*0.1)*2;
+    camera.lookAt(0,0,0);
+
+    updateFireworks();
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+
+// ============================================================
+// 弹幕系统
+// ============================================================
+(function(){
+  var container = document.getElementById('danmaku-container');
+  var lanes = [8,15,22,30,38,46,54,62,70,78]; // 纵向轨道百分比
+  var laneLastTime = lanes.map(function(){ return 0; });
+
+  function getFreeLane(){
+    var now = Date.now();
+    var best = 0, bestGap = 0;
+    for(var i=0;i<lanes.length;i++){
+      var gap = now - laneLastTime[i];
+      if(gap > bestGap){ bestGap=gap; best=i; }
+    }
+    return best;
+  }
+
+  function launchDanmaku(){
+    var text = DANMAKU_LIST[Math.floor(Math.random()*DANMAKU_LIST.length)];
+    var laneIdx = getFreeLane();
+    laneLastTime[laneIdx] = Date.now();
+
+    var el = document.createElement('div');
+    el.className = 'danmaku-item';
+    el.textContent = text;
+    var top = lanes[laneIdx];
+    el.style.top = top + 'vh';
+    el.style.left = '100vw';
+    var dur = 9 + Math.random()*5;
+    el.style.animationDuration = dur + 's';
+    // 随机粉色深浅
+    var alpha = (0.08 + Math.random()*0.12).toFixed(2);
+    el.style.background = 'rgba(255,100,170,'+alpha+')';
+    container.appendChild(el);
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, (dur+0.5)*1000);
+  }
+
+  // 主内容显示后才启动弹幕
+  function startDanmaku(){
+    launchDanmaku();
+    setInterval(launchDanmaku, 1800);
+    // 开场多发几条
+    setTimeout(function(){ for(var i=0;i<3;i++){ (function(d){ setTimeout(launchDanmaku, d); })(i*400); } }, 500);
+  }
+
+  // 等开场结束后启动
+  var mainContent = document.getElementById('mainContent');
+  var obs = new MutationObserver(function(mutations){
+    mutations.forEach(function(m){
+      if(m.target.classList.contains('visible')){ startDanmaku(); obs.disconnect(); }
+    });
+  });
+  obs.observe(mainContent, { attributes:true, attributeFilter:['class'] });
+  // 兜底：8秒后无论如何启动
+  setTimeout(startDanmaku, 9000);
+})();
+
+// ============================================================
+// 2D 鼠标跟随爱心（overlayCanvas）
+// ============================================================
+(function(){
+  var canvas = document.getElementById('overlayCanvas');
+  var ctx = canvas.getContext('2d');
+  var pts = [];
+  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  document.addEventListener('mousemove', function(e){
+    if(pts.length<25){
+      pts.push({x:e.clientX,y:e.clientY,s:Math.random()*9+4,a:1,dx:(Math.random()-0.5)*0.6,c:['#ff6eb4','#ffb4dc','#ff69b4','#ffaad4'][Math.floor(Math.random()*4)]});
+    }
+  });
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pts = pts.filter(function(p){ return p.a>0; });
+    pts.forEach(function(p){
+      ctx.save(); ctx.globalAlpha=p.a; ctx.fillStyle=p.c; ctx.font=p.s+'px serif';
+      ctx.fillText('❤',p.x-p.s/2,p.y); ctx.restore();
+      p.y-=0.9; p.x+=p.dx; p.a-=0.014;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ============================================================
+// 开场粒子爱心（2D Canvas）
+// ============================================================
+(function(){
+  var canvas = document.getElementById('heartCanvas');
+  var ctx = canvas.getContext('2d');
+  var opening = document.getElementById('opening');
+  var particles = [];
+  var phase = 'gather';
+  var frame = 0;
+  function resize(){ canvas.width=window.innerWidth; canvas.height=Math.min(window.innerHeight*0.6,500); }
+  resize(); window.addEventListener('resize', resize);
+  function hx(t){ return 16*Math.pow(Math.sin(t),3); }
+  function hy(t){ return -(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)); }
+  var pts=[];
+  var sc=Math.min(canvas.width,canvas.height)*0.03;
+  var cx2=canvas.width/2, cy2=canvas.height/2+20;
+  for(var i2=0;i2<300;i2++){ var t2=(i2/300)*Math.PI*2; pts.push({tx:cx2+hx(t2)*sc, ty:cy2+hy(t2)*sc}); }
+  pts.forEach(function(hp){
+    particles.push({ x:Math.random()*canvas.width, y:Math.random()*canvas.height, tx:hp.tx, ty:hp.ty, sz:Math.random()*3+1, h:330+Math.random()*30, s:85, l:60+Math.random()*25, a:Math.random()*0.5+0.5 });
+  });
+  function animate2(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    frame++;
+    particles.forEach(function(p){
+      if(phase==='gather'){
+        var dx=p.tx-p.x, dy=p.ty-p.y, d=Math.sqrt(dx*dx+dy*dy)+0.001;
+        var sp=Math.max(d*0.03,0.5);
+        p.x+=(dx/d)*sp; p.y+=(dy/d)*sp;
+        p.a=Math.min(1,p.a+0.02);
+      } else if(phase==='heart'){
+        var pl=1+0.05*Math.sin(frame*0.05);
+        p.x=p.tx+(p.tx-cx2)*(pl-1);
+        p.y=p.ty+(p.ty-cy2)*(pl-1);
+      }
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz,0,Math.PI*2);
+      ctx.fillStyle='hsla('+p.h+','+p.s+'%,'+p.l+'%,'+p.a+')'; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz*3,0,Math.PI*2);
+      ctx.fillStyle='hsla('+p.h+','+p.s+'%,'+p.l+'%,0.08)'; ctx.fill();
+    });
+    if(phase==='gather'&&frame>120){ phase='heart'; frame=0; }
+    requestAnimationFrame(animate2);
+  }
+  animate2();
+  function enter(){
+    if(opening.classList.contains('hidden')) return;
+    opening.classList.add('hidden');
+    setTimeout(function(){
+      document.getElementById('mainContent').classList.add('visible');
+      opening.style.display='none';
+    },1400);
+  }
+  opening.addEventListener('click', enter);
+  setTimeout(enter, 8000);
+})();
+
+// ============================================================
+// 生成时间线（打字机效果）
+// ============================================================
+(function(){
+  var container = document.getElementById('timeline');
+  TIMELINE_DATA.forEach(function(item, i){
+    var div = document.createElement('div');
+    div.className = 'timeline-item';
+    div.style.transitionDelay = (i*0.15)+'s';
+    div.innerHTML = '<div class="timeline-dot"></div>'
+      +'<div class="timeline-date">'+item.date+'</div>'
+      +'<div class="timeline-card">'
+        +'<div class="photo"><img src="'+item.photo+'" alt="回忆" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.innerHTML=\'<span style=&quot;color:rgba(255,180,220,0.4);font-size:14px&quot;>📷 替换为你们的照片</span>\'"></div>'
+        +'<div class="words" data-words="'+item.words.replace(/"/g,'&quot;')+'"></div>'
+      +'</div>';
+    container.appendChild(div);
+  });
+})();
+
+// ============================================================
+// 生成相册
+// ============================================================
+(function(){
+  var container = document.getElementById('gallery');
+  GALLERY_DATA.forEach(function(item, i){
+    var div = document.createElement('div');
+    div.className = 'gallery-item';
+    div.style.transitionDelay = (i*0.1)+'s';
+    div.innerHTML = '<img src="'+item.src+'" alt="'+item.caption+'" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.innerHTML=\'<span style=&quot;color:rgba(255,180,220,0.4);font-size:14px;display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column&quot;>📷<br><small>'+item.caption+'</small></span>\'">'
+      +'<div class="overlay"><div class="caption">'+item.caption+'</div></div>';
+    container.appendChild(div);
+  });
+})();
+
+// ============================================================
+// 滚动触发 + 打字机效果
+// ============================================================
+(function(){
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        var wordsEl = entry.target.querySelector('.words');
+        if(wordsEl && !wordsEl.dataset.typed){
+          wordsEl.dataset.typed='1';
+          var fullText = wordsEl.getAttribute('data-words')||'';
+          wordsEl.textContent='';
+          var idx=0;
+          var timer=setInterval(function(){
+            if(idx<fullText.length){ wordsEl.textContent+=fullText.charAt(idx); idx++; }
+            else clearInterval(timer);
+          },60);
+        }
+      }
+    });
+  }, {threshold:0.15});
+  document.querySelectorAll('.timeline-item,.gallery-item,.ending').forEach(function(el){ observer.observe(el); });
+})();
+
+// ============================================================
+// 音乐控制
+// ============================================================
+(function(){
+  var btn = document.getElementById('music-btn');
+  var audio = document.getElementById('bgm');
+  var playing = false;
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(!audio.src||audio.src.indexOf('mp3')===-1){
+      alert('请将「这就是爱.mp3」放到 D:\\WorkBuddy\\520-for-baby\\ 目录下，然后刷新页面！');
+      return;
+    }
+    if(playing){ audio.pause(); btn.classList.remove('playing'); btn.textContent='🎵'; }
+    else { audio.play().then(function(){ btn.classList.add('playing'); btn.textContent='♪'; }).catch(function(){}); }
+    playing=!playing;
+  });
+  document.addEventListener('click', function(){
+    if(audio.src&&audio.src.indexOf('mp3')>-1&&!playing){
+      audio.play().then(function(){ btn.classList.add('playing'); btn.textContent='♪'; playing=true; }).catch(function(){});
+    }
+  },{once:true});
+})();
+</script>
+</body>
+</html>
