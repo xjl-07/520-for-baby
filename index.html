@@ -165,9 +165,7 @@ body{font-family:'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-ser
 </div>
 
 <button id="music-btn" title="播放/暂停音乐">🎵</button>
-<audio id="bgm" loop preload="auto">
-  <source src="这就是爱.mp3" type="audio/mpeg">
-</audio>
+<audio id="bgm" loop preload="auto" src="这就是爱.mp3"></audio>
 
 <!-- Three.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -590,21 +588,34 @@ var DANMAKU_LIST = [
   var btn = document.getElementById('music-btn');
   var audio = document.getElementById('bgm');
   var playing = false;
+
+  function tryPlay(){
+    if(playing) return;
+    audio.play().then(function(){
+      playing = true;
+      btn.classList.add('playing');
+      btn.textContent = '♪';
+    }).catch(function(){});
+  }
+
   btn.addEventListener('click', function(e){
     e.stopPropagation();
-    if(!audio.src||audio.src.indexOf('mp3')===-1){
-      alert('请将「这就是爱.mp3」放到 D:\\WorkBuddy\\520-for-baby\\ 目录下，然后刷新页面！');
+    if(!audio.currentSrc){
+      alert('音乐文件加载失败，请刷新重试');
       return;
     }
-    if(playing){ audio.pause(); btn.classList.remove('playing'); btn.textContent='🎵'; }
-    else { audio.play().then(function(){ btn.classList.add('playing'); btn.textContent='♪'; }).catch(function(){}); }
-    playing=!playing;
+    if(playing){ audio.pause(); btn.classList.remove('playing'); btn.textContent='🎵'; playing=false; }
+    else { tryPlay(); }
   });
-  document.addEventListener('click', function(){
-    if(audio.src&&audio.src.indexOf('mp3')>-1&&!playing){
-      audio.play().then(function(){ btn.classList.add('playing'); btn.textContent='♪'; playing=true; }).catch(function(){});
-    }
-  },{once:true});
+
+  // 首次用户交互时尝试播放
+  function firstInteraction(){
+    tryPlay();
+    document.removeEventListener('touchstart', firstInteraction);
+    document.removeEventListener('click', firstInteraction);
+  }
+  document.addEventListener('touchstart', firstInteraction, {once:false});
+  document.addEventListener('click', firstInteraction, {once:false});
 })();
 
 // ============================================================
