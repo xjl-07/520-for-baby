@@ -25,11 +25,11 @@ body{font-family:'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-ser
   letter-spacing:1px;
   padding:6px 14px;
   border-radius:20px;
-  background:rgba(255,130,200,0.18);
-  border:1px solid rgba(255,150,210,0.35);
+  background:rgba(255,130,200,0.06);
+  border:1px solid rgba(255,150,210,0.15);
   backdrop-filter:blur(4px);
-  color:rgba(255,220,235,0.9);
-  text-shadow:0 0 8px rgba(255,100,170,0.5);
+  color:rgba(255,220,235,0.45);
+  text-shadow:0 0 8px rgba(255,100,170,0.2);
   animation:danmaku-move linear forwards;
   pointer-events:none;
 }
@@ -135,6 +135,50 @@ body{font-family:'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-ser
   /* 手机音乐按钮位置 */
   #music-btn{bottom:20px;right:20px;width:44px;height:44px;font-size:20px}
 }
+
+/* ===== 气球 ===== */
+.balloon {
+  position: fixed;
+  bottom: -120px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  z-index: 9995;
+  pointer-events: none;
+  animation: balloon-rise ease-in-out forwards;
+}
+.balloon::after {
+  content: '';
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 20px;
+  background: rgba(255,150,200,0.4);
+}
+@keyframes balloon-rise {
+  0%   { transform: translateY(0) rotate(0deg);     opacity: 0.8; }
+  25%  { transform: translateY(-25vh) rotate(5deg); opacity: 0.8; }
+  50%  { transform: translateY(-55vh) rotate(-4deg); }
+  75%  { transform: translateY(-85vh) rotate(3deg);  opacity: 0.5; }
+  100% { transform: translateY(-125vh) rotate(1deg); opacity: 0; }
+}
+
+/* ===== 郁金香花瓣飘落 ===== */
+.tulip-petal {
+  position: fixed;
+  top: -60px;
+  pointer-events: none;
+  z-index: 9994;
+  opacity: 0;
+  animation: petal-fall linear forwards;
+}
+@keyframes petal-fall {
+  0%   { opacity: 0;    transform: translateY(0)      rotate(0deg)   scale(1); }
+  8%   { opacity: 0.85; }
+  85%  { opacity: 0.7;  }
+  100% { opacity: 0;    transform: translateY(110vh)  rotate(380deg) scale(0.75); }
+}
+
 </style>
 </head>
 <body>
@@ -439,7 +483,7 @@ var DANMAKU_LIST = [
     var dur = 9 + Math.random()*5;
     el.style.animationDuration = dur + 's';
     // 随机粉色深浅
-    var alpha = (0.08 + Math.random()*0.12).toFixed(2);
+    var alpha = (0.03 + Math.random()*0.05).toFixed(2);
     el.style.background = 'rgba(255,100,170,'+alpha+')';
     container.appendChild(el);
     setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, (dur+0.5)*1000);
@@ -753,5 +797,88 @@ var DANMAKU_LIST = [
   });
 })();
 </script>
+
+<script>
+// ===== 气球系统 =====
+(function(){
+  var colors = [
+    'rgba(255,100,180,0.82)','rgba(255,150,210,0.80)','rgba(220,80,200,0.78)',
+    'rgba(255,180,230,0.75)','rgba(255,120,160,0.82)','rgba(200,100,220,0.78)'
+  ];
+  function launchBalloon(){
+    var el = document.createElement('div');
+    el.className = 'balloon';
+    var left  = 5 + Math.random() * 90;
+    var size  = 28 + Math.random() * 26;
+    var dur   = 8 + Math.random() * 6;
+    var color = colors[Math.floor(Math.random() * colors.length)];
+    el.style.cssText = [
+      'left:' + left + 'vw',
+      'width:' + size + 'px',
+      'height:' + (size * 1.28) + 'px',
+      'background:' + color,
+      'box-shadow:inset -4px -4px 10px rgba(0,0,0,0.1),2px 2px 8px ' + color.replace(/[\d.]+\)$/, '0.3)'),
+      'animation-duration:' + dur + 's'
+    ].join(';');
+    document.body.appendChild(el);
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, (dur+1)*1000);
+  }
+  setTimeout(function(){
+    launchBalloon();
+    setInterval(launchBalloon, 2800);
+    for(var i=1;i<=4;i++){ (function(d){ setTimeout(launchBalloon,d); })(i*600); }
+  }, 1800);
+})();
+
+// ===== 郁金香花瓣系统 =====
+(function(){
+  var petalDefs = [
+    {rx:8,ry:12,cx:12,cy:16,w:24,h:28},
+    {rx:7,ry:11,cx:10,cy:14,w:20,h:26},
+    {rx:6,ry:10,cx:9, cy:12,w:18,h:22},
+    {rx:9,ry:8, cx:11,cy:11,w:22,h:20},
+  ];
+  var pinkPairs = [
+    ['rgba(255,100,160,0.88)','rgba(255,160,200,0.65)'],
+    ['rgba(255,130,180,0.85)','rgba(255,180,220,0.60)'],
+    ['rgba(240,80,160,0.90)', 'rgba(255,140,200,0.68)'],
+    ['rgba(255,160,210,0.80)','rgba(255,200,230,0.55)'],
+    ['rgba(220,60,160,0.88)', 'rgba(240,130,200,0.62)'],
+  ];
+  function makeSVG(d, c1, c2){
+    var rot = Math.random()*30 - 15;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+d.w+' '+d.h+'" width="'+d.w+'" height="'+d.h+'">'
+      +'<ellipse cx="'+d.cx+'" cy="'+d.cy+'" rx="'+d.rx+'" ry="'+d.ry+'" fill="'+c1+'" transform="rotate('+rot+','+d.cx+','+d.cy+')" opacity="0.88"/>'
+      +'<ellipse cx="'+d.cx+'" cy="'+(d.cy-d.ry*0.4)+'" rx="'+(d.rx*0.6)+'" ry="'+(d.ry*0.55)+'" fill="'+c2+'" opacity="0.55"/>'
+      +'</svg>';
+  }
+  function launchPetal(){
+    var el = document.createElement('div');
+    el.className = 'tulip-petal';
+    var left  = Math.random() * 100;
+    var scale = 0.65 + Math.random() * 0.9;
+    var dur   = 6 + Math.random() * 6;
+    var drift = (Math.random()-0.5) * 18;
+    var def   = petalDefs[Math.floor(Math.random()*petalDefs.length)];
+    var pair  = pinkPairs[Math.floor(Math.random()*pinkPairs.length)];
+    el.style.cssText = [
+      'left:'+left+'vw',
+      'margin-left:'+drift+'vw',
+      'transform:scale('+scale+')',
+      'transform-origin:center top',
+      'animation-duration:'+dur+'s'
+    ].join(';');
+    el.innerHTML = makeSVG(def, pair[0], pair[1]);
+    document.body.appendChild(el);
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, (dur+1)*1000);
+  }
+  setTimeout(function(){
+    launchPetal();
+    setInterval(launchPetal, 1800);
+    for(var i=1;i<=5;i++){ (function(d){ setTimeout(launchPetal,d); })(i*400); }
+  }, 1200);
+})();
+</script>
+
 </body>
 </html>
