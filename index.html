@@ -163,20 +163,36 @@ body{font-family:'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-ser
   100% { transform: translateY(-125vh) rotate(1deg); opacity: 0; }
 }
 
-/* ===== 郁金香花瓣飘落 ===== */
-.tulip-petal {
-  position: fixed;
-  top: -60px;
-  pointer-events: none;
-  z-index: 9994;
-  opacity: 0;
-  animation: petal-fall linear forwards;
-}
-@keyframes petal-fall {
-  0%   { opacity: 0;    transform: translateY(0)      rotate(0deg)   scale(1); }
-  8%   { opacity: 0.85; }
+8%   { opacity: 0.85; }
   85%  { opacity: 0.7;  }
   100% { opacity: 0;    transform: translateY(110vh)  rotate(380deg) scale(0.75); }
+}
+
+
+/* ===== 固定郁金香装饰 ===== */
+.fixed-tulip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9993;
+  opacity: 0.72;
+  filter: drop-shadow(0 2px 8px rgba(255,80,160,0.35));
+  transition: opacity 0.5s ease;
+}
+.fixed-tulip:hover { opacity: 0.92; }
+/* 四角位置 */
+.ft-tl { top: 18px; left: 12px; transform: rotate(-18deg) scaleX(-1); }
+.ft-tr { top: 18px; right: 12px; transform: rotate(18deg); }
+.ft-bl { bottom: 80px; left: 12px; transform: rotate(8deg) scaleX(-1); }
+.ft-br { bottom: 80px; right: 12px; transform: rotate(-8deg); }
+/* 中间两侧 */
+.ft-ml { top: 45%; left: 8px; transform: rotate(5deg) scaleX(-1); }
+.ft-mr { top: 45%; right: 8px; transform: rotate(-5deg); }
+
+@media(max-width:768px){
+  .fixed-tulip { opacity: 0.55; }
+  .ft-ml,.ft-mr { display: none; }
+  .ft-tl,.ft-tr { top:10px; }
+  .ft-bl,.ft-br { bottom:70px; }
 }
 
 </style>
@@ -188,6 +204,273 @@ body{font-family:'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-ser
 <!-- 2D 鼠标爱心叠层 -->
 <canvas id="overlayCanvas"></canvas>
 <!-- 弹幕层 -->
+
+<!-- 固定郁金香装饰 -->
+<div class="fixed-tulip ft-tl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 92" width="75" height="116">
+  <!-- 茎 -->
+  <path d="M30 88 Q28 70 30 52" stroke="#3a8a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- 叶片左 -->
+  <path d="M29 72 Q18 62 20 52 Q26 64 29 68" fill="#4caf50" opacity="0.85"/>
+  <!-- 叶片右 -->
+  <path d="M31 65 Q43 55 40 45 Q35 57 31 62" fill="#4caf50" opacity="0.85"/>
+  <!-- 花托 -->
+  <ellipse cx="30" cy="50" rx="7" ry="5" fill="#2d7a2d" opacity="0.9"/>
+  <!-- 花瓣1（左外） -->
+  <path d="M30 50 Q14 38 18 22 Q26 36 30 44" fill="url(#t1pg1)" opacity="0.92"/>
+  <!-- 花瓣2（右外） -->
+  <path d="M30 50 Q46 38 42 22 Q34 36 30 44" fill="url(#t1pg2)" opacity="0.92"/>
+  <!-- 花瓣3（中前） -->
+  <path d="M30 50 Q22 32 30 16 Q38 32 30 50" fill="url(#t1pg3)" opacity="0.95"/>
+  <!-- 花瓣4（左内） -->
+  <path d="M30 48 Q18 38 22 26 Q28 38 30 44" fill="url(#t1pg4)" opacity="0.75"/>
+  <!-- 花瓣5（右内） -->
+  <path d="M30 48 Q42 38 38 26 Q32 38 30 44" fill="url(#t1pg5)" opacity="0.75"/>
+  <!-- 花心光泽 -->
+  <ellipse cx="30" cy="34" rx="5" ry="7" fill="rgba(255,220,240,0.3)"/>
+  <defs>
+    <linearGradient id="t1pg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff4da6"/>
+      <stop offset="100%" stop-color="#ffaad4"/>
+    </linearGradient>
+    <linearGradient id="t1pg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff3d9a"/>
+      <stop offset="100%" stop-color="#ff80c0"/>
+    </linearGradient>
+    <linearGradient id="t1pg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff66b3"/>
+      <stop offset="100%" stop-color="#ffb3d9"/>
+    </linearGradient>
+    <linearGradient id="t1pg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+    <linearGradient id="t1pg5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+  </defs>
+</svg></div>
+<div class="fixed-tulip ft-tr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 92" width="75" height="116">
+  <!-- 茎 -->
+  <path d="M30 88 Q28 70 30 52" stroke="#3a8a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- 叶片左 -->
+  <path d="M29 72 Q18 62 20 52 Q26 64 29 68" fill="#4caf50" opacity="0.85"/>
+  <!-- 叶片右 -->
+  <path d="M31 65 Q43 55 40 45 Q35 57 31 62" fill="#4caf50" opacity="0.85"/>
+  <!-- 花托 -->
+  <ellipse cx="30" cy="50" rx="7" ry="5" fill="#2d7a2d" opacity="0.9"/>
+  <!-- 花瓣1（左外） -->
+  <path d="M30 50 Q14 38 18 22 Q26 36 30 44" fill="url(#t2pg1)" opacity="0.92"/>
+  <!-- 花瓣2（右外） -->
+  <path d="M30 50 Q46 38 42 22 Q34 36 30 44" fill="url(#t2pg2)" opacity="0.92"/>
+  <!-- 花瓣3（中前） -->
+  <path d="M30 50 Q22 32 30 16 Q38 32 30 50" fill="url(#t2pg3)" opacity="0.95"/>
+  <!-- 花瓣4（左内） -->
+  <path d="M30 48 Q18 38 22 26 Q28 38 30 44" fill="url(#t2pg4)" opacity="0.75"/>
+  <!-- 花瓣5（右内） -->
+  <path d="M30 48 Q42 38 38 26 Q32 38 30 44" fill="url(#t2pg5)" opacity="0.75"/>
+  <!-- 花心光泽 -->
+  <ellipse cx="30" cy="34" rx="5" ry="7" fill="rgba(255,220,240,0.3)"/>
+  <defs>
+    <linearGradient id="t2pg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff4da6"/>
+      <stop offset="100%" stop-color="#ffaad4"/>
+    </linearGradient>
+    <linearGradient id="t2pg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff3d9a"/>
+      <stop offset="100%" stop-color="#ff80c0"/>
+    </linearGradient>
+    <linearGradient id="t2pg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff66b3"/>
+      <stop offset="100%" stop-color="#ffb3d9"/>
+    </linearGradient>
+    <linearGradient id="t2pg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+    <linearGradient id="t2pg5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+  </defs>
+</svg></div>
+<div class="fixed-tulip ft-bl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 92" width="75" height="116">
+  <!-- 茎 -->
+  <path d="M30 88 Q28 70 30 52" stroke="#3a8a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- 叶片左 -->
+  <path d="M29 72 Q18 62 20 52 Q26 64 29 68" fill="#4caf50" opacity="0.85"/>
+  <!-- 叶片右 -->
+  <path d="M31 65 Q43 55 40 45 Q35 57 31 62" fill="#4caf50" opacity="0.85"/>
+  <!-- 花托 -->
+  <ellipse cx="30" cy="50" rx="7" ry="5" fill="#2d7a2d" opacity="0.9"/>
+  <!-- 花瓣1（左外） -->
+  <path d="M30 50 Q14 38 18 22 Q26 36 30 44" fill="url(#t3pg1)" opacity="0.92"/>
+  <!-- 花瓣2（右外） -->
+  <path d="M30 50 Q46 38 42 22 Q34 36 30 44" fill="url(#t3pg2)" opacity="0.92"/>
+  <!-- 花瓣3（中前） -->
+  <path d="M30 50 Q22 32 30 16 Q38 32 30 50" fill="url(#t3pg3)" opacity="0.95"/>
+  <!-- 花瓣4（左内） -->
+  <path d="M30 48 Q18 38 22 26 Q28 38 30 44" fill="url(#t3pg4)" opacity="0.75"/>
+  <!-- 花瓣5（右内） -->
+  <path d="M30 48 Q42 38 38 26 Q32 38 30 44" fill="url(#t3pg5)" opacity="0.75"/>
+  <!-- 花心光泽 -->
+  <ellipse cx="30" cy="34" rx="5" ry="7" fill="rgba(255,220,240,0.3)"/>
+  <defs>
+    <linearGradient id="t3pg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff4da6"/>
+      <stop offset="100%" stop-color="#ffaad4"/>
+    </linearGradient>
+    <linearGradient id="t3pg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff3d9a"/>
+      <stop offset="100%" stop-color="#ff80c0"/>
+    </linearGradient>
+    <linearGradient id="t3pg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff66b3"/>
+      <stop offset="100%" stop-color="#ffb3d9"/>
+    </linearGradient>
+    <linearGradient id="t3pg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+    <linearGradient id="t3pg5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+  </defs>
+</svg></div>
+<div class="fixed-tulip ft-br"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 92" width="75" height="116">
+  <!-- 茎 -->
+  <path d="M30 88 Q28 70 30 52" stroke="#3a8a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- 叶片左 -->
+  <path d="M29 72 Q18 62 20 52 Q26 64 29 68" fill="#4caf50" opacity="0.85"/>
+  <!-- 叶片右 -->
+  <path d="M31 65 Q43 55 40 45 Q35 57 31 62" fill="#4caf50" opacity="0.85"/>
+  <!-- 花托 -->
+  <ellipse cx="30" cy="50" rx="7" ry="5" fill="#2d7a2d" opacity="0.9"/>
+  <!-- 花瓣1（左外） -->
+  <path d="M30 50 Q14 38 18 22 Q26 36 30 44" fill="url(#t4pg1)" opacity="0.92"/>
+  <!-- 花瓣2（右外） -->
+  <path d="M30 50 Q46 38 42 22 Q34 36 30 44" fill="url(#t4pg2)" opacity="0.92"/>
+  <!-- 花瓣3（中前） -->
+  <path d="M30 50 Q22 32 30 16 Q38 32 30 50" fill="url(#t4pg3)" opacity="0.95"/>
+  <!-- 花瓣4（左内） -->
+  <path d="M30 48 Q18 38 22 26 Q28 38 30 44" fill="url(#t4pg4)" opacity="0.75"/>
+  <!-- 花瓣5（右内） -->
+  <path d="M30 48 Q42 38 38 26 Q32 38 30 44" fill="url(#t4pg5)" opacity="0.75"/>
+  <!-- 花心光泽 -->
+  <ellipse cx="30" cy="34" rx="5" ry="7" fill="rgba(255,220,240,0.3)"/>
+  <defs>
+    <linearGradient id="t4pg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff4da6"/>
+      <stop offset="100%" stop-color="#ffaad4"/>
+    </linearGradient>
+    <linearGradient id="t4pg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff3d9a"/>
+      <stop offset="100%" stop-color="#ff80c0"/>
+    </linearGradient>
+    <linearGradient id="t4pg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff66b3"/>
+      <stop offset="100%" stop-color="#ffb3d9"/>
+    </linearGradient>
+    <linearGradient id="t4pg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+    <linearGradient id="t4pg5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+  </defs>
+</svg></div>
+<div class="fixed-tulip ft-ml"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 92" width="85" height="131">
+  <!-- 茎 -->
+  <path d="M30 88 Q28 70 30 52" stroke="#3a8a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- 叶片左 -->
+  <path d="M29 72 Q18 62 20 52 Q26 64 29 68" fill="#4caf50" opacity="0.85"/>
+  <!-- 叶片右 -->
+  <path d="M31 65 Q43 55 40 45 Q35 57 31 62" fill="#4caf50" opacity="0.85"/>
+  <!-- 花托 -->
+  <ellipse cx="30" cy="50" rx="7" ry="5" fill="#2d7a2d" opacity="0.9"/>
+  <!-- 花瓣1（左外） -->
+  <path d="M30 50 Q14 38 18 22 Q26 36 30 44" fill="url(#t5pg1)" opacity="0.92"/>
+  <!-- 花瓣2（右外） -->
+  <path d="M30 50 Q46 38 42 22 Q34 36 30 44" fill="url(#t5pg2)" opacity="0.92"/>
+  <!-- 花瓣3（中前） -->
+  <path d="M30 50 Q22 32 30 16 Q38 32 30 50" fill="url(#t5pg3)" opacity="0.95"/>
+  <!-- 花瓣4（左内） -->
+  <path d="M30 48 Q18 38 22 26 Q28 38 30 44" fill="url(#t5pg4)" opacity="0.75"/>
+  <!-- 花瓣5（右内） -->
+  <path d="M30 48 Q42 38 38 26 Q32 38 30 44" fill="url(#t5pg5)" opacity="0.75"/>
+  <!-- 花心光泽 -->
+  <ellipse cx="30" cy="34" rx="5" ry="7" fill="rgba(255,220,240,0.3)"/>
+  <defs>
+    <linearGradient id="t5pg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff4da6"/>
+      <stop offset="100%" stop-color="#ffaad4"/>
+    </linearGradient>
+    <linearGradient id="t5pg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff3d9a"/>
+      <stop offset="100%" stop-color="#ff80c0"/>
+    </linearGradient>
+    <linearGradient id="t5pg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff66b3"/>
+      <stop offset="100%" stop-color="#ffb3d9"/>
+    </linearGradient>
+    <linearGradient id="t5pg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+    <linearGradient id="t5pg5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+  </defs>
+</svg></div>
+<div class="fixed-tulip ft-mr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 92" width="85" height="131">
+  <!-- 茎 -->
+  <path d="M30 88 Q28 70 30 52" stroke="#3a8a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- 叶片左 -->
+  <path d="M29 72 Q18 62 20 52 Q26 64 29 68" fill="#4caf50" opacity="0.85"/>
+  <!-- 叶片右 -->
+  <path d="M31 65 Q43 55 40 45 Q35 57 31 62" fill="#4caf50" opacity="0.85"/>
+  <!-- 花托 -->
+  <ellipse cx="30" cy="50" rx="7" ry="5" fill="#2d7a2d" opacity="0.9"/>
+  <!-- 花瓣1（左外） -->
+  <path d="M30 50 Q14 38 18 22 Q26 36 30 44" fill="url(#t6pg1)" opacity="0.92"/>
+  <!-- 花瓣2（右外） -->
+  <path d="M30 50 Q46 38 42 22 Q34 36 30 44" fill="url(#t6pg2)" opacity="0.92"/>
+  <!-- 花瓣3（中前） -->
+  <path d="M30 50 Q22 32 30 16 Q38 32 30 50" fill="url(#t6pg3)" opacity="0.95"/>
+  <!-- 花瓣4（左内） -->
+  <path d="M30 48 Q18 38 22 26 Q28 38 30 44" fill="url(#t6pg4)" opacity="0.75"/>
+  <!-- 花瓣5（右内） -->
+  <path d="M30 48 Q42 38 38 26 Q32 38 30 44" fill="url(#t6pg5)" opacity="0.75"/>
+  <!-- 花心光泽 -->
+  <ellipse cx="30" cy="34" rx="5" ry="7" fill="rgba(255,220,240,0.3)"/>
+  <defs>
+    <linearGradient id="t6pg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff4da6"/>
+      <stop offset="100%" stop-color="#ffaad4"/>
+    </linearGradient>
+    <linearGradient id="t6pg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff3d9a"/>
+      <stop offset="100%" stop-color="#ff80c0"/>
+    </linearGradient>
+    <linearGradient id="t6pg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff66b3"/>
+      <stop offset="100%" stop-color="#ffb3d9"/>
+    </linearGradient>
+    <linearGradient id="t6pg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+    <linearGradient id="t6pg5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff80c8"/>
+      <stop offset="100%" stop-color="#ffd0e8"/>
+    </linearGradient>
+  </defs>
+</svg></div>
+
 <div id="danmaku-container"></div>
 
 <!-- 灯箱 -->
@@ -302,7 +585,7 @@ var DANMAKU_LIST = [
   });
 
   // ---- 3D 星空粒子 ----
-  var starCount = 1500;
+  var starCount = 600;
   var starGeo = new THREE.BufferGeometry();
   var starPos = new Float32Array(starCount*3);
   var starColors = new Float32Array(starCount*3);
@@ -830,54 +1113,6 @@ var DANMAKU_LIST = [
   }, 1800);
 })();
 
-// ===== 郁金香花瓣系统 =====
-(function(){
-  var petalDefs = [
-    {rx:8,ry:12,cx:12,cy:16,w:24,h:28},
-    {rx:7,ry:11,cx:10,cy:14,w:20,h:26},
-    {rx:6,ry:10,cx:9, cy:12,w:18,h:22},
-    {rx:9,ry:8, cx:11,cy:11,w:22,h:20},
-  ];
-  var pinkPairs = [
-    ['rgba(255,100,160,0.88)','rgba(255,160,200,0.65)'],
-    ['rgba(255,130,180,0.85)','rgba(255,180,220,0.60)'],
-    ['rgba(240,80,160,0.90)', 'rgba(255,140,200,0.68)'],
-    ['rgba(255,160,210,0.80)','rgba(255,200,230,0.55)'],
-    ['rgba(220,60,160,0.88)', 'rgba(240,130,200,0.62)'],
-  ];
-  function makeSVG(d, c1, c2){
-    var rot = Math.random()*30 - 15;
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+d.w+' '+d.h+'" width="'+d.w+'" height="'+d.h+'">'
-      +'<ellipse cx="'+d.cx+'" cy="'+d.cy+'" rx="'+d.rx+'" ry="'+d.ry+'" fill="'+c1+'" transform="rotate('+rot+','+d.cx+','+d.cy+')" opacity="0.88"/>'
-      +'<ellipse cx="'+d.cx+'" cy="'+(d.cy-d.ry*0.4)+'" rx="'+(d.rx*0.6)+'" ry="'+(d.ry*0.55)+'" fill="'+c2+'" opacity="0.55"/>'
-      +'</svg>';
-  }
-  function launchPetal(){
-    var el = document.createElement('div');
-    el.className = 'tulip-petal';
-    var left  = Math.random() * 100;
-    var scale = 0.65 + Math.random() * 0.9;
-    var dur   = 6 + Math.random() * 6;
-    var drift = (Math.random()-0.5) * 18;
-    var def   = petalDefs[Math.floor(Math.random()*petalDefs.length)];
-    var pair  = pinkPairs[Math.floor(Math.random()*pinkPairs.length)];
-    el.style.cssText = [
-      'left:'+left+'vw',
-      'margin-left:'+drift+'vw',
-      'transform:scale('+scale+')',
-      'transform-origin:center top',
-      'animation-duration:'+dur+'s'
-    ].join(';');
-    el.innerHTML = makeSVG(def, pair[0], pair[1]);
-    document.body.appendChild(el);
-    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, (dur+1)*1000);
-  }
-  setTimeout(function(){
-    launchPetal();
-    setInterval(launchPetal, 1800);
-    for(var i=1;i<=5;i++){ (function(d){ setTimeout(launchPetal,d); })(i*400); }
-  }, 1200);
-})();
 </script>
 
 </body>
